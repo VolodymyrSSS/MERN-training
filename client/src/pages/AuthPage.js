@@ -1,6 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useHttp } from '../hooks/http.hook'
+import { useMessage } from '../hooks/message.hook'
 
 export const AuthPage = () => {
+
+  const message = useMessage()
+
+  const {loading, request, error, clearError} = useHttp()
+
+  const [form, setForm] = useState({
+    email: '', password: ''
+  })
+
+  useEffect(() => {
+    message(error)
+    clearError()
+  }, [error, message, clearError])
+
+  const changeHandler = event => {
+    setForm({...form, [event.target.name]: event.target.value})
+  }
+
+  const registerHandler = async () => {
+    try {
+      const data = await request('/api/auth/register', 'POST', {...form})
+      message(data.message);
+    } catch(e) {}
+  }
+
+  const loginHandler = async () => {
+    try {
+      const data = await request('/api/auth/login', 'POST', {...form})
+      message(data.message)
+    } catch(e) {}
+  }
+
   return (
     <div className='row'>
       <div className='col s6 offset-s3'>
@@ -16,7 +50,8 @@ export const AuthPage = () => {
                   id="email" 
                   type="text" 
                   name="email" 
-                  className="yellow-input" 
+                  className="yellow-input"
+                  onChange={changeHandler} 
                 />
                 <label htmlFor="email">Email</label>
               </div>
@@ -27,7 +62,8 @@ export const AuthPage = () => {
                   id="password" 
                   type="password" 
                   name="password" 
-                  className="yellow-input" 
+                  className="yellow-input"
+                  onChange={changeHandler}
                 />
                 <label htmlFor="password">Password</label>
               </div>
@@ -35,8 +71,21 @@ export const AuthPage = () => {
             </div>
           </div>
           <div className="card-action">
-            <button className='btn yellow darken-4' style={{marginRight: 10}}>Log In</button>
-            <button className='btn grey lighten-1 black-text'>Sign Up</button>
+            <button 
+              className='btn yellow darken-4' 
+              style={{marginRight: 10}}
+              onClick = {loginHandler}
+              disabled = {loading}
+            >
+              Log In
+            </button>
+            <button 
+              className='btn grey lighten-1 black-text'
+              onClick = {registerHandler}
+              disabled = {loading}
+            >
+              Sign Up
+            </button>
           </div>
         </div>
       </div>

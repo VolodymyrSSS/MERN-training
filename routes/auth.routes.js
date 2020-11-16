@@ -20,7 +20,7 @@ router.post(
       if(!errors.isEmpty()){
         return res.status(400).json({
           errors: errors.array(),
-          message: 'During registration, received NOT correct data'
+          message: 'Password or email is NOT valid'
         })
       }
 
@@ -46,7 +46,7 @@ router.post(
 router.post(
   '/login',
   [
-    check('email', 'Input correct email').normalizeEmail().isEmail(),
+    check('email', 'Input correct email').isEmail(),
     check('password', 'Input Password').exists()
   ],
   async(req, res) => {
@@ -55,17 +55,18 @@ router.post(
       if(!errors.isEmpty()){
         return res.status(400).json({
           errors: errors.array(),
-          message: 'During login, received NOT correct data'
+          message: 'Password or email is NOT valid'
         })
       }
 
       const {email, password} = req.body
 
-      const user = await User.findOne({ email })
+      const user = await User.findOne({email})
       if(!user) {
-        return res.status(400).json({message: 'User hasn\'t been found!'})
+        return res.status(400).json({message: 'User has NOT been found!'})
       }
 
+      
       const isMatch = await bcrypt.compare(password, user.password)
       if(!isMatch) {
         return res.status(400).json({message: 'The password is NOT correct! Try again.'})
@@ -77,7 +78,9 @@ router.post(
         { expiresIn: '1h' }
       )
 
-      res.status(200).json({token, userId: user.id})
+      // res.status(201).json({token, userId: user.id})
+      res.json({token, userId: user.id})
+
 
     } catch(e){
       res.status(500).json({ message: 'Something wrong! Try again!' })
